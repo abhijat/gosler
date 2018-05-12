@@ -11,7 +11,6 @@ The auth token will be cached for the login session and will be used to communic
 
 ###### Dependencies
 
-* github.com/chzyer/readline
-* github.com/fatih/color
+* github.com/peterh/liner
 
 

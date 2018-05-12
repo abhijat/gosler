@@ -1,61 +1,55 @@
 package cli
 
 import (
-	"log"
-	"os"
 	"io"
 	"strings"
 	"github.com/abhijat/gosler/vault"
 	"errors"
-	"github.com/chzyer/readline"
+	"fmt"
 )
 
 func Shell(client *vault.Client) {
-	l, err := NewRL()
-	if err != nil {
-		log.Fatalln(err)
-	}
-	defer l.Close()
-	log.SetOutput(os.Stderr)
+
+	console := NewConsole("[gosler] ")
 
 	for {
-		line, err := l.Readline()
+		line, err := console.Prompt(console.prompt)
 		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			fmt.Println("failed to read input:", err)
 			break
 		}
 
 		line = strings.TrimSpace(line)
 
-		switch {
-
-		case len(line) == 0:
+		if len(line) == 0 {
 			continue
+		}
 
-		case strings.HasPrefix(line, "set-prompt"):
-			switchPrompt(line, l)
+		console.AppendHistory(line)
 
-		case line == "exit":
-			os.Exit(0)
+		if strings.HasPrefix(line, "set-prompt") {
+			console.SwitchPrompt(line)
+		}
 
-		case line == "health-probe":
+		if line == "exit" {
+			console.Exit()
+		}
+
+		if line == "health-probe" {
 			printResponse(client.HealthProbe())
+		}
 
-		case strings.HasPrefix(line, "read-secret "):
+		if strings.HasPrefix(line, "read-secret") {
 			fields := strings.Fields(line)
 			if len(fields) != 2 {
 				printResponse(nil, errors.New("need a secret path with read-secret"))
 				continue
 			}
-
 			printResponse(client.ReadSecret(fields[1]))
 		}
-	}
-}
-
-func switchPrompt(s string, l *readline.Instance) {
-	if len(s) <= 11 {
-		printResponse(nil, errors.New("set-prompt <prompt>"))
-	} else {
-		l.SetPrompt(prompt(s[11:]))
 	}
 }

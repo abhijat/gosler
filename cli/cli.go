@@ -4,7 +4,11 @@ import (
 	"encoding/json"
 	"bytes"
 	"fmt"
+	"os"
+	"io"
 )
+
+var consoleOutput io.Writer = os.Stdout
 
 func formatSuccess(b bytes.Buffer) string {
 	return string(b.Bytes())
@@ -30,5 +34,5 @@ func formatResponse(b []byte, e error) string {
 }
 
 func printResponse(b []byte, e error) {
-	fmt.Println(formatResponse(b, e))
+	fmt.Fprintln(consoleOutput, formatResponse(b, e))
 }

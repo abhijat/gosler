@@ -11,6 +11,7 @@ import (
 func Shell(client *vault.Client) {
 
 	console := NewConsole("[gosler] ")
+	defer console.Close()
 
 	for {
 		line, err := console.Prompt(console.prompt)

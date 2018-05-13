@@ -6,27 +6,29 @@ import (
 	"fmt"
 )
 
-func printOk(b bytes.Buffer) {
-	fmt.Println(string(b.Bytes()))
+func formatSuccess(b bytes.Buffer) string {
+	return string(b.Bytes())
 }
 
-func printError(e error) {
-	fmt.Println("error:", e)
+func formatError(e error) string {
+	return fmt.Sprint("error: ", e)
 }
 
-func printResponse(b []byte, e error) {
+func formatResponse(b []byte, e error) string {
 	if e != nil {
-		printError(e)
-		return
+		return formatError(e)
 	}
 
 	var buf bytes.Buffer
 	err := json.Indent(&buf, b, "", "  ")
 
 	if err != nil {
-		printError(err)
-		return
+		return formatError(err)
 	}
 
-	printOk(buf)
+	return formatSuccess(buf)
+}
+
+func printResponse(b []byte, e error) {
+	fmt.Println(formatResponse(b, e))
 }

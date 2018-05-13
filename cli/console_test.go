@@ -6,9 +6,10 @@ import (
 	"bytes"
 	"strings"
 	"github.com/stretchr/testify/assert"
+	"fmt"
 )
 
-func captureOutput(f func()) string {
+func captureConsoleOutput(f func()) string {
 	old := consoleOutput
 
 	var b bytes.Buffer
@@ -21,15 +22,27 @@ func captureOutput(f func()) string {
 }
 
 func Test_completionEngine(t *testing.T) {
-	candidates := completionEngine("r")
-	assert.Equal(t, []string{"read-secret", "read-policy"}, candidates)
+
+	testCases := []struct {
+		input      string
+		candidates []string
+	}{
+		{input: "r", candidates: []string{"read-secret", "read-policy"}},
+		{input: "read-x", candidates: nil},
+		{input: "set", candidates: []string{"set-prompt"}},
+	}
+
+	for _, testCase := range testCases {
+		candidates := completionEngine(testCase.input)
+		assert.Equal(t, testCase.candidates, candidates, fmt.Sprintf("result does not match for input: %s", testCase.input))
+	}
 }
 
 func Test_console_SwitchPrompt(t *testing.T) {
 	c := NewConsole("")
 	defer c.Close()
 
-	output := captureOutput(func() {
+	output := captureConsoleOutput(func() {
 		c.SwitchPrompt("set-prompt")
 	})
 

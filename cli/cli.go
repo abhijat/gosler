@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"io"
+	"strings"
 )
 
 var consoleOutput io.Writer = os.Stdout
@@ -35,4 +36,16 @@ func formatResponse(b []byte, e error) string {
 
 func printResponse(b []byte, e error) {
 	fmt.Fprintln(consoleOutput, formatResponse(b, e))
+}
+
+func captureConsoleOutput(f func()) string {
+	old := consoleOutput
+
+	var b bytes.Buffer
+	consoleOutput = &b
+
+	f()
+
+	consoleOutput = old
+	return strings.TrimSpace(string(b.Bytes()))
 }
